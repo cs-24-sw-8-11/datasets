@@ -1,51 +1,109 @@
 import csv
-import os
 import sys
 import sqlite3
 import random
+from typing import Any
+import math
+from subprocess import check_output
+import os
 
-dataset = sys.argv[sys.argv.index("--dataset")+1]
+# ARGUMENT PARSING
 
-infofile = sys.argv[sys.argv.index("--info")+1]
+arg_help:dict[str, dict[str, Any]] = {}
 
-db = sys.argv[sys.argv.index("--database")+1]
+def getArg(args:list[str], dtype:type, default):
+    arg_help[args[0]] = {
+        "aliases":args[1:],
+        "default":default
+    }
+
+    if dtype == bool:
+        return any([arg in sys.argv for arg in args])
+
+    for arg in args:
+        if arg in sys.argv:
+            return dtype(sys.argv[sys.argv.index(arg)+1])
+    return dtype(default)
+
+csvfile =     getArg(["--file", "-f"], str, "data.csv")
+db =          getArg(["--database", "-d"], str, "db.db3")
+codebook =    getArg(["--codebook", "-c"], str, "codebook.txt")
+help_enable = getArg(["--help", "-h", "-?"], bool, False)
+
+if help_enable:
+    print(sys.argv[0])
+    for key, data in arg_help.items():
+        print(f'{key}\r\t\t\t{data["aliases"]}\r\t\t\t\t\t\t{data["default"]}')
+    exit(0)
 
 connection = sqlite3.Connection(db)
 
-id_offset = 100
+# compile...
+os.system("g++ hash.cpp")
 
-with open(infofile) as file:
-    qs = [(line.split("\t", 1)[0][1:], line.split("\t", 1)[1]) for line in file.read().split("\n") if len(line) > 0 and line[0] == "Q"]
-    for index, q in qs:
-        cursor = sqlite3.Cursor(connection)
-        query = f"insert or replace into questions (id, type, question) values (?, ?, ?)"
-        cursor.execute(query, [id_offset+int(index), 0, q])
-        connection.commit()
+print_enable = False
 
-print("Inserted questions at an id offset of {qid_offset}")
+def insert(table:str, data:dict[str, str]):
+    global print_enable
+    cursor = sqlite3.Cursor(connection)
+    if print_enable: print(f"inserting into table: {table} values: {data}")
+    statement = f"insert into {table} ({','.join(data.keys())}) values ({','.join(['?' for _ in range(len(data.keys()))])})"
+    cursor.execute(statement, list(data.values()))
 
 
-with open(dataset, newline='') as csvfile:
-    reader = csv.reader(csvfile, delimiter='\t', quotechar='|')
-    header = []
-    qcount = None
-    jid = id_offset
-    for user_count, row in enumerate(reader):
+with open("codebook.txt", "r") as file:
+    questions = {line.split("\t")[0][1:]:line.split("\t")[-1] for line in file.read().split("\n") if len(line) > 0 and line[0] == "Q"}
+
+for key, value in questions.items():
+    insert("questions", {
+        "id":int(key)+100,
+        "type":"valued",
+        "question":value
+    })
+
+with open(csvfile, "r") as file:
+    reader = csv.reader(file, delimiter='\t', quotechar='|')
+    header = None
+    jid = 100
+    for i, row in enumerate(reader):
+        uid = i+100
+        print_enable = not (uid%100)
         if not header:
             header = row
-            qcount = len([col for col in header if col[0] == "Q" and col[-1] == "A"])
-            print(f"There are {qcount} questions")
-        else:
-            cursor = sqlite3.Cursor(connection)
-            query = f"insert into users (username, password, state) values (?, ?, ?)"
-            print(f"creating user: user{user_count}")
-            cursor.execute(query, [f'user{user_count}', "123", 1])
-            for _ in range(3):
-                jid += 1
-                query = f"insert into journals (id, userId) values (?, ?)"
-                cursor.execute(query, [jid, user_count])
-                for qid in [random.randint(1, qcount) for _ in range(8)]:
-                    answer = row[header.index(f"Q{qid}A")]
-                    query = f"insert into answers (answer, journalId, questionId) values (?, ?, ?)"
-                    cursor.execute(query, [answer, jid, qid])
-            connection.commit()
+            continue
+        insert("users", {
+            "id":uid,
+            "username":f"user{uid}",
+            "state":"1",
+            "password":check_output(["./a.out", f"user{uid}", "123"]).decode()
+        })
+        age = int(row[header.index("age")])
+        lower = int(math.floor(age/10)*10)
+        upper = int(math.ceil((age+1)/10)*10)-1
+        insert("userdata", {
+            "userId":uid,
+            "agegroup":f"{lower}-{upper}",
+            "major":row[header.index("major")]
+        })
+        for _ in range(3):
+            jid+=1
+            insert("journals", {
+                "id":jid,
+                "userId":uid,
+            })
+            picks = []
+            answercount = 0
+            while answercount < 8:
+                qid = random.randint(1, len(questions.keys()))
+                if qid in picks:
+                    continue
+                picks.append(qid)
+                answercount+=1
+                answer = row[header.index(f"Q{qid}A")]
+                insert("answers", {
+                    "answer":answer,
+                    "questionId":qid,
+                    "journalId":jid
+                })
+
+connection.commit()

@@ -5,7 +5,6 @@ sentiment_pipeline = transformers.pipeline(model="lxyuan/distilbert-base-multili
 
 res = sentiment_pipeline(sys.argv[1:])
 
-print(res)
 
 for result in res:
     if result['score'] < .5:

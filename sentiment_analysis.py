@@ -12,7 +12,7 @@ for result in res:
         else:
             print(result['score']+1) # low score should be neutral between 1 to 2, negative neutrals should be between 1 to 1.5
     else:
-        if result["score"] == "POSITIVE":
+        if result["label"] == "POSITIVE":
             print(result['score']+2) # positive should be between 2 to 3
         else:
             print(result['score']) # negative should be between 0 to 1

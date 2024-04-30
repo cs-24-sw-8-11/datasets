@@ -1,11 +1,5 @@
 import csv
-import sys
 import sqlite3
-import random
-from typing import Any
-import math
-from subprocess import check_output
-import os
 
 csvfile = "mitigations.csv"
 db = "db.db3"

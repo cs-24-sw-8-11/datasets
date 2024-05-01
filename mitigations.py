@@ -19,7 +19,8 @@ with open(csvfile, "r") as file:
         insert("mitigations", {
         "type":row["type"],
         "tags":row["tag"],
-        "mitigation":row["mitigation"]
+        "title":row["title"],
+		"description":row["description"]
     })
     
 

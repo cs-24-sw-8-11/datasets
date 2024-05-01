@@ -101,7 +101,7 @@ with open(csvfile, "r") as file:
             "id":uid,
             "username":f"user{uid}",
             "state":"1",
-            "password":check_output(["./tmp/hash.out", f"user{uid}", "123"]).decode()
+            "password":check_output(["/tmp/hash.out", f"user{uid}", "123"]).decode()
         })
         age = int(row[header.index("age")])
         lower = int(math.floor(age/10)*10)

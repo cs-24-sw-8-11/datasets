@@ -127,7 +127,8 @@ with open(csvfile, "r") as file:
                 answercount+=1
                 answer = row[header.index(f"Q{qid}A")]
                 insert("answers", {
-                    "answer":answer,
+                    "value":answer,
+                    "rating":random.randint(0,100)/100,
                     "questionId":qid,
                     "journalId":jid
                 })

@@ -20,6 +20,7 @@ def getArg(args:list[str], dtype:type, default):
         "default":default
     }
 
+
     if dtype == bool:
         return any([arg in sys.argv for arg in args])
 
@@ -32,6 +33,8 @@ csvfile =     getArg(["--file", "-f"], str, "data.csv")
 db =          getArg(["--database", "-d"], str, "db.db3")
 codebook =    getArg(["--codebook", "-c"], str, "codebook.txt")
 help_enable = getArg(["--help", "-h", "-?"], bool, False)
+mitigations = getArg(["--mitigations", "-m"], str, "mitigations.csv")
+end =         getArg(["--tables", "-t"], str, "all")
 
 if help_enable:
     print(sys.argv[0])
@@ -132,5 +135,16 @@ with open(csvfile, "r") as file:
                     "questionId":qid,
                     "journalId":jid
                 })
+
+with open(mitigations, "r") as file:
+    reader = csv.DictReader(file)
+
+    for row in reader:
+        insert("mitigations", {
+        "type":row["type"],
+        "tags":row["tag"],
+        "title":row["title"],
+		"description":row["description"]
+    })
 
 connection.commit()

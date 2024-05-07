@@ -34,7 +34,7 @@ db =          getArg(["--database", "-d"], str, "db.db3")
 codebook =    getArg(["--codebook", "-c"], str, "codebook.txt")
 help_enable = getArg(["--help", "-h", "-?"], bool, False)
 mitigations = getArg(["--mitigations", "-m"], str, "mitigations.csv")
-end =         getArg(["--tables", "-t"], str, "all")
+tables =      getArg(["--tables", "-t"], str, "all").split(",")
 
 if help_enable:
     print(sys.argv[0])
@@ -50,6 +50,8 @@ os.system(f"g++ {script_dir}/hash.cpp -o /tmp/hash.out")
 print_enable = False
 
 def insert(table:str, data:dict[str, str]):
+    if table in tables:
+        return
     global print_enable
     cursor = sqlite3.Cursor(connection)
     if print_enable: print(f"inserting into table: {table} values: {data}")
@@ -136,6 +138,7 @@ with open(csvfile, "r") as file:
                     "journalId":jid
                 })
 
+print_enable = True
 with open(mitigations, "r") as file:
     reader = csv.DictReader(file)
 

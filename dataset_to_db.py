@@ -50,7 +50,7 @@ os.system(f"g++ {script_dir}/hash.cpp -o /tmp/hash.out")
 print_enable = False
 
 def insert(table:str, data:dict[str, str]):
-    if table in tables:
+    if not table in tables and not table == "all":
         return
     global print_enable
     cursor = sqlite3.Cursor(connection)

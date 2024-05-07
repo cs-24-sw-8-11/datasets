@@ -6,6 +6,7 @@ from typing import Any
 import math
 from subprocess import check_output
 import os
+import datetime
 
 # DIR_OF_SCRIPT
 script_dir="/".join(sys.argv[0].split("/")[:-1])
@@ -116,10 +117,11 @@ with open(csvfile, "r") as file:
             "agegroup":f"{lower}-{upper}",
             "major":row[header.index("major")]
         })
-        for _ in range(3):
+        for i in range(3):
             jid+=1
             insert("journals", {
                 "id":jid,
+                "timestamp":(datetime.datetime.fromtimestamp(0)+datetime.timedelta.days(i)),
                 "userId":uid,
             })
             picks = []

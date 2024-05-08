@@ -6,6 +6,8 @@ from typing import Any
 import math
 from subprocess import check_output
 import os
+import datetime
+import time
 
 # DIR_OF_SCRIPT
 script_dir="/".join(sys.argv[0].split("/")[:-1])
@@ -35,6 +37,7 @@ codebook =    getArg(["--codebook", "-c"], str, "codebook.txt")
 help_enable = getArg(["--help", "-h", "-?"], bool, False)
 mitigations = getArg(["--mitigations", "-m"], str, "mitigations.csv")
 tables =      getArg(["--tables", "-t"], str, "all").split(",")
+now = time.time()
 
 if help_enable:
     print(sys.argv[0])
@@ -50,7 +53,7 @@ os.system(f"g++ {script_dir}/hash.cpp -o /tmp/hash.out")
 print_enable = False
 
 def insert(table:str, data:dict[str, str]):
-    if table in tables:
+    if not table in tables and not tables[0] == "all":
         return
     global print_enable
     cursor = sqlite3.Cursor(connection)
@@ -116,10 +119,11 @@ with open(csvfile, "r") as file:
             "agegroup":f"{lower}-{upper}",
             "major":row[header.index("major")]
         })
-        for _ in range(3):
+        for i in range(3):
             jid+=1
             insert("journals", {
                 "id":jid,
+                "timestamp":now-(86400*i),
                 "userId":uid,
             })
             picks = []

@@ -7,6 +7,7 @@ import math
 from subprocess import check_output
 import os
 import datetime
+import time
 
 # DIR_OF_SCRIPT
 script_dir="/".join(sys.argv[0].split("/")[:-1])
@@ -51,7 +52,7 @@ os.system(f"g++ {script_dir}/hash.cpp -o /tmp/hash.out")
 print_enable = False
 
 def insert(table:str, data:dict[str, str]):
-    if not table in tables and not table == "all":
+    if not table in tables and not tables[0] == "all":
         return
     global print_enable
     cursor = sqlite3.Cursor(connection)
@@ -121,7 +122,7 @@ with open(csvfile, "r") as file:
             jid+=1
             insert("journals", {
                 "id":jid,
-                "timestamp":(datetime.datetime.fromtimestamp(0)+datetime.timedelta.days(i)),
+                "timestamp":time.time() - (604800 - (86400 * i+2)), # 1 week
                 "userId":uid,
             })
             picks = []

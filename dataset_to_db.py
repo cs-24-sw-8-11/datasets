@@ -116,8 +116,15 @@ with open(csvfile, "r") as file:
         upper = int(math.ceil((age+1)/10)*10)-1
         insert("userdata", {
             "userId":uid,
-            "agegroup":f"{lower}-{upper}",
-            "major":row[header.index("major")]
+            "education":row[header.index("education")],
+            "urban":row[header.index("urban")],
+            "gender":row[header.index("urban")],
+            "religion":row[header.index("religion")],
+            "orientation":row[header.index("orientation")],
+            "race":row[header.index("race")],
+            "married":row[header.index("married")],
+            "age":row[header.index("age")],
+            "pets":random.randint(0, 1)
         })
         for i in range(3):
             jid+=1

@@ -37,6 +37,7 @@ codebook =    getArg(["--codebook", "-c"], str, "codebook.txt")
 help_enable = getArg(["--help", "-h", "-?"], bool, False)
 mitigations = getArg(["--mitigations", "-m"], str, "mitigations.csv")
 tables =      getArg(["--tables", "-t"], str, "all").split(",")
+now = time.time()
 
 if help_enable:
     print(sys.argv[0])
@@ -122,7 +123,7 @@ with open(csvfile, "r") as file:
             jid+=1
             insert("journals", {
                 "id":jid,
-                "timestamp":time.time() - (604800 - (86400 * i+2)), # 1 week
+                "timestamp":now-(86400*i),
                 "userId":uid,
             })
             picks = []

@@ -81,12 +81,31 @@ with open(codebook, "r") as file:
         "married"
     ]}
 
-for key, value in default_questions.items():
+default_questions["age"] = {
+    "question":"What is your age?",
+    "args":{}
+}
+default_questions["pets"] = {
+    "question":"Do you have any pets?",
+    "args":{
+        1:"yes",
+        2:"no"
+    }
+}
+
+for qid, (key, value) in enumerate(default_questions.items()):
     insert("questions", {
+        "id":qid+1,
         "type":"valued",
         "question":value["question"], # we need to extend this to also store descriptions for args
         "tags":"default"
     })
+    for index, arg in value["args"].items():
+        insert("legends", {
+            "questionId":qid,
+            "text":arg,
+            "legend_index":index
+        })
 
 for key, value in questions.items():
     insert("questions", {

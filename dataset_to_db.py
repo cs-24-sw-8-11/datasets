@@ -102,7 +102,7 @@ for qid, (key, value) in enumerate(default_questions.items()):
     })
     for index, arg in value["args"].items():
         insert("legends", {
-            "questionId":qid,
+            "questionId":qid+1,
             "text":arg,
             "legend_index":index
         })

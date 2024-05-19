@@ -23,4 +23,4 @@ for result in res:
             # negative should be between 0 to 1
             final.append(1-result['score']) 
 
-print(','.join([str(e) for e in final]))
+print('\n'.join([str(e) for e in final]))
